@@ -67,9 +67,9 @@ if __name__ == "__main__":
         accuracy = correct / len(automated) if automated else 0
         print(f"{threshold:>9.2f}  {len(automated) / n:>9.0%}  {accuracy:>21.0%}  {len(automated) - correct:>17}")
 
-    print(f"\nWrong but confident (confidence >= {GATE}), the dangerous ones:")
+    print(f"\nWrong but confident (confidence >= {GATE}, not GDPR), the dangerous ones:")
     for a, (reply, intent, _) in rows:
-        if a["intent"]["confidence"] >= GATE and a["intent"]["choice"] != intent:
+        if a["intent"]["confidence"] >= GATE and a["intent"]["choice"] != intent and a["gdpr"]["noul"] < 0.5:
             print(f"  {a['intent']['confidence']:.2f}  jev={a['intent']['choice']:<14} label={intent:<14} {reply}")
 
     print(f"\nSent to a person (confidence < {GATE} or GDPR):")

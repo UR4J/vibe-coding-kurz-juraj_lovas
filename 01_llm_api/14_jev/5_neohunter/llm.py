@@ -23,6 +23,9 @@ def llm_chat(prompt: str) -> dict:
             "model": LLM_MODEL,
             "messages": [{"role": "user", "content": prompt}],
             "usage": {"include": True},
+            # Drafts are short. Without a cap OpenRouter reserves credit for the
+            # model maximum (65k tokens) and fails with 402 on a small balance.
+            "max_tokens": 400,
         },
         timeout=60,
     )

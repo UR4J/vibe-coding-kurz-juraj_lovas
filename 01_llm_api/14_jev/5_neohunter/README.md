@@ -35,9 +35,24 @@ uv run 1_reply_triage_gate.py
 uv run 2_inbox_then_draft.py
 ```
 
-## Výsledky
+## Výsledky (27. 10. 2026, `typesafe/jev-1.13`)
 
-Doplním po prvom reálnom behu: presnosť pri prahu 0.8, podiel automatizácie, cena.
+**Golden set, 32 odpovedí:**
+
+| Prah istoty | Automaticky | Presnosť automatických | Chyby automatu |
+|:--|:--|:--|:--|
+| 0.50 | 84 % | 100 % | 0 |
+| **0.80** | **78 %** | **100 %** | **0** |
+| 0.90 | 66 % | 100 % | 0 |
+
+- **GDPR zachytené 32/32**, vrátane nepriamej otázky "Kde ste vzali moje údaje?".
+- Na človeka išli presne tie nejasné: "Ďakujem, ozvem sa." (0.45), "Nemám záujem o túto, ale ak budete mať niečo v Pharma..." (0.32), "Ok" (0.73).
+- Cena **$0.00074 za 32 odpovedí**, priemerne 574 ms na odpoveď. Slovenčina aj čeština fungujú.
+
+**Inbox, 8 odpovedí:** 6 automaticky (istota 0.82 až 1.00), GDPR na človeka, "ok pošlite info" na človeka (0.41).
+
+**Pozor, nepreceňovať:** golden set je malý a odpovede aj označenia písal ten istý autor.
+Pred nasadením treba 100+ reálnych odpovedí z inboxu, označených človekom.
 
 ## Prečo je to dôležité pre Neohunter
 
