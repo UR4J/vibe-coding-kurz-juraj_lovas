@@ -9,9 +9,17 @@ Každá lekcia má vlastný priečinok s číslom (`01_...`, `02_...`). Materiá
 sa nahráva bez zmien ako samostatný commit, moja práca ide do ďalších commitov nad ním.
 Vďaka tomu je v histórii vždy vidieť, čo je od lektora a čo moje.
 
+## Domáce úlohy
+
+| Úloha | Zadanie | Riešenie | Deadline | Stav |
+|:--|:--|:--|:--|:--|
+| 1 | Python skript: LLM API + nástroj, výsledok späť do LLM | [`domaci_ukoly/ukol_01_llm_tools`](domaci_ukoly/ukol_01_llm_tools) | 27. 11. 2026 | hotové |
+
+## Lekcie
+
 | Lekcia | Priečinok | Téma | Stav |
 |:--|:--|:--|:--|
-| 01 | `01_llm_api` | LLM API: OpenAI, Anthropic, Gemini, Grok, HuggingFace, OpenRouter, lokálne modely (Ollama, LM Studio, Unsloth), RunPod, LiteLLM, ReAct agent, Cerebras, Jev | rozpracované |
+| 01 | `01_llm_api` | LLM API: OpenAI, Anthropic, Gemini, Grok, HuggingFace, OpenRouter, lokálne modely (Ollama, LM Studio, Unsloth), RunPod, LiteLLM, ReAct agent, Cerebras, Jev | OpenAI, Anthropic, ReAct, Jev hotové (viď `POZNAMKY.md`) |
 
 ## Nová lekcia
 
