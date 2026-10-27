@@ -15,7 +15,7 @@ client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 # But "system" parameter is available in the API
 
 response = client.messages.create(
-    model="claude-3-7-sonnet-20250219",
+    model="claude-sonnet-5-5",
     system="You are an AI assistant.",
     messages=[
         {"role": "user", "content": "Tell me a joke."},

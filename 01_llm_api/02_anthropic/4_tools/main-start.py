@@ -40,7 +40,7 @@ tools = [
 ]
 
 response = client.messages.create(
-    model="claude-3-7-sonnet-20250219",
+    model="claude-sonnet-5-5",
     max_tokens=1024,
     system="You are an AI assistant.",
     messages=[

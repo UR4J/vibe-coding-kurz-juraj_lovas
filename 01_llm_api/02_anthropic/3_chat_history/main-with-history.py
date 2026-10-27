@@ -17,7 +17,7 @@ messages = []
 messages.append({"role": "user", "content": "Tell me a joke."})
 
 response1 = client.messages.create(
-    model="claude-3-7-sonnet-20250219",
+    model="claude-sonnet-5-5",
     max_tokens=1024,
     system="You are an AI assistant.",
     messages=messages
@@ -33,7 +33,7 @@ print(response1.content[0].text)
 messages.append({"role": "user", "content": "Repeat me please the previous joke."})
 
 response2 = client.messages.create(
-    model="claude-3-7-sonnet-20250219",
+    model="claude-sonnet-5-5",
     max_tokens=1024,
     system="You are an AI assistant.",
     messages=messages

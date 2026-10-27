@@ -61,7 +61,7 @@ available_functions = {
 }
 
 # Function to process messages and handle function calls
-def get_completion_from_messages(messages, model="claude-3-7-sonnet-20250219"):
+def get_completion_from_messages(messages, model="claude-sonnet-5-5"):
     response = client.messages.create(
         model=model,
         max_tokens=1024,

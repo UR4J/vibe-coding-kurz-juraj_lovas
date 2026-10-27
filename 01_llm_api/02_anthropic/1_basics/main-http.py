@@ -22,7 +22,7 @@ prompt = "Tell me a joke."
 # But "system" parameter is available in the API
 
 data = {
-    "model": "claude-3-7-sonnet-20250219",
+    "model": "claude-sonnet-5-5",
     "system": "You are an AI assistant.",
     "max_tokens": 1024,
     "messages": [
