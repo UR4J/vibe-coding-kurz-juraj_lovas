@@ -1,7 +1,7 @@
 # Vibe Coding kurz
 
 Kurz Global Classes, 27. 10. 2026 až 1. 12. 2026, lektor Lukáš Kellerstein.
-Súkromné repo `UR4J/vibe-coding-kurz-juraj_lovas`: materiály z lekcií a moje riešenia na jednom mieste.
+Repo `UR4J/vibe-coding-kurz-juraj_lovas` (verejné, zdieľané s lektorom): materiály z lekcií a moje riešenia na jednom mieste.
 
 ## Štruktúra
 
@@ -32,4 +32,4 @@ uv run main.py
 ## Pravidlá
 
 - API kľúče iba v `.env`, nikdy v kóde ani v commite (`.env` je v `.gitignore`).
-- Repo ostáva **private**: obsahuje materiály lektora.
+- Repo je **verejné**: pred každým commitom skontrolovať, že v ňom nie je kľúč, token ani dáta kandidátov či klientov.
