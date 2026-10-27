@@ -15,7 +15,7 @@ load_dotenv()
 # LiteLLM lets this SAME agent talk to ANY provider. You only change the .env:
 #   - MODEL     : a LiteLLM model string, e.g.
 #                   openai/gpt-4o-mini
-#                   anthropic/claude-sonnet-4-5
+#                   anthropic/claude-sonnet-5-5
 #                   gemini/gemini-2.5-flash
 #                   xai/grok-4
 #                   huggingface/together/openai/gpt-oss-20b
@@ -96,17 +96,27 @@ available_functions = {
 class ReactAgent:
     """A provider-agnostic ReAct (Reason and Act) agent powered by LiteLLM."""
 
-    def __init__(self, model: str = MODEL, api_base: str | None = API_BASE):
+    def __init__(
+        self,
+        model: str = MODEL,
+        api_base: str | None = API_BASE,
+        tools: List[Dict[str, Any]] | None = None,
+        functions: Dict[str, Any] | None = None,
+    ):
         self.model = model
         self.api_base = api_base
         self.max_iterations = 10
+        # Tools are injectable, so the same loop can run any toolset
+        # (default: the stock tools above; see neohunter_agent.py for another set)
+        self.tools = tools if tools is not None else globals()["tools"]
+        self.functions = functions if functions is not None else available_functions
 
     def _complete(self, messages: List[Dict[str, Any]]):
         # LiteLLM only forwards api_base when it is set (local providers).
         kwargs: Dict[str, Any] = {
             "model": self.model,
             "messages": messages,
-            "tools": tools,
+            "tools": self.tools,
             "tool_choice": "auto",
         }
         if self.api_base:
@@ -159,7 +169,7 @@ class ReactAgent:
                     print(f"Executing tool: {function_name}({function_args})")
 
                     # Call the function
-                    function_to_call = available_functions[function_name]
+                    function_to_call = self.functions[function_name]
                     function_response = function_to_call(**function_args)
 
                     print(f"Tool result: {function_response}")

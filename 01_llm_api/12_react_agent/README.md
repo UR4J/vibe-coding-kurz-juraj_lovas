@@ -19,7 +19,7 @@ change.
 Copy `.env.example` to `.env` and pick a provider by setting two things:
 
 - `MODEL` — a LiteLLM model string (e.g. `openai/gpt-4o-mini`,
-  `anthropic/claude-sonnet-4-5`, `openrouter/google/gemma-4-31b-it:free`)
+  `anthropic/claude-sonnet-5-5`, `openrouter/google/gemma-4-31b-it:free`)
 - the matching `<PROVIDER>_API_KEY` (e.g. `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`,
   `OPENROUTER_API_KEY`) — LiteLLM reads these automatically.
 
