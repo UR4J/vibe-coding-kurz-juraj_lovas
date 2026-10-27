@@ -4,6 +4,12 @@ import anthropic
 from dotenv import load_dotenv
 load_dotenv()  
 
+def text_of(response):
+    """Join all text blocks of a response. Newer models can also return
+    thinking or tool_use blocks, so content[0] is not always text."""
+    return "".join(block.text for block in response.content if block.type == "text")
+
+
 client = anthropic.Anthropic(
     api_key=os.environ.get("ANTHROPIC_API_KEY")
 )
@@ -24,10 +30,10 @@ response1 = client.messages.create(
 )
 
 # Get assistant's response and add it to the history
-messages.append({"role": "assistant", "content": response1.content[0].text})
+messages.append({"role": "assistant", "content": response1.content})  # full content, incl. thinking blocks
 
 print("--- Response text: ---")
-print(response1.content[0].text)
+print(text_of(response1))
 
 # Second user query
 messages.append({"role": "user", "content": "Repeat me please the previous joke."})
@@ -40,7 +46,7 @@ response2 = client.messages.create(
 )
 
 # Get assistant's response and add it to the history
-messages.append({"role": "assistant", "content": response2.content[0].text})
+messages.append({"role": "assistant", "content": response2.content})  # full content, incl. thinking blocks
 
 print("--- Response text: ---")
-print(response2.content[0].text)
+print(text_of(response2))

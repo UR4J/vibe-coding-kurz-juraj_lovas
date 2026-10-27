@@ -4,6 +4,12 @@ import anthropic
 from dotenv import load_dotenv
 load_dotenv()  
 
+def text_of(response):
+    """Join all text blocks of a response. Newer models can also return
+    thinking or tool_use blocks, so content[0] is not always text."""
+    return "".join(block.text for block in response.content if block.type == "text")
+
+
 client = anthropic.Anthropic(
     api_key=os.environ.get("ANTHROPIC_API_KEY")
 )
@@ -18,7 +24,7 @@ response1 = client.messages.create(
 )
 
 print("--- Response text: ---")
-print(response1.content[0].text)
+print(text_of(response1))
 
 
 response2 = client.messages.create(
@@ -31,4 +37,4 @@ response2 = client.messages.create(
 )
 
 print("--- Response text: ---")
-print(response2.content[0].text)
+print(text_of(response2))

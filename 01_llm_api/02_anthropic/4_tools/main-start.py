@@ -4,6 +4,12 @@ import anthropic
 from dotenv import load_dotenv
 load_dotenv()  
 
+def text_of(response):
+    """Join all text blocks of a response. Newer models can also return
+    thinking or tool_use blocks, so content[0] is not always text."""
+    return "".join(block.text for block in response.content if block.type == "text")
+
+
 client = anthropic.Anthropic(
     api_key=os.environ.get("ANTHROPIC_API_KEY")
 )
@@ -53,6 +59,7 @@ response = client.messages.create(
 print("--- Full response: ---")
 pprint(response)
 print("--- Response text: ---")
-print(response.content[0].text)
+print(text_of(response))
 print("--- Response Tool call: ---")
-print(response.content[1])
+# Find the tool_use block by type, its position in content is not fixed
+print(next((block for block in response.content if block.type == "tool_use"), None))
