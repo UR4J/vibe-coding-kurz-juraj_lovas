@@ -41,6 +41,9 @@ DEMO_QUESTIONS = [
     "B chce 3 900 € mesačne (14 platov). Pri fee 20 %: na ktorom zarobíme viac a o koľko?",
 ]
 
+if not os.environ.get("ANTHROPIC_API_KEY"):
+    sys.exit("Chýba ANTHROPIC_API_KEY: skopíruj .env.example na .env a vlož kľúč.")
+
 client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from the environment / .env
 
 
