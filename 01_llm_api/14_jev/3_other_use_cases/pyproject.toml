@@ -1,0 +1,11 @@
+[project]
+name = "jev-other-use-cases"
+version = "0.1.0"
+description = "Jev use cases outside banking"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.12.3",
+    "python-dotenv>=1.0.1",
+    "requests>=2.32.3",
+]

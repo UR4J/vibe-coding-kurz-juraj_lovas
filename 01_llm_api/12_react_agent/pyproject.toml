@@ -1,0 +1,11 @@
+[project]
+name = "react-agent"
+version = "0.1.0"
+description = "A provider-agnostic ReAct (Reason and Act) AI agent powered by LiteLLM"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "litellm==1.74.9",
+    "python-dotenv>=1.0.1",
+    "yfinance>=0.2.54",
+]

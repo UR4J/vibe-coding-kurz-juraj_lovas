@@ -1,0 +1,42 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      - POSTGRES_USER=myuser1
+      - POSTGRES_PASSWORD=mysecretpassword1
+      - POSTGRES_DB=litellmdb
+    # 5439 on the host, not 5432. Docker Desktop's gvproxy already listens on
+    # 5432 on this machine, and the DB lessons take 5433. Nothing outside this
+    # file needs the port - LiteLLM reaches postgres inside the compose network.
+    ports:
+      - "5439:5432"
+    volumes:
+      - llm_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser1 -d litellmdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  litellm:
+    image: ghcr.io/berriai/litellm:main-stable
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://myuser1:mysecretpassword1@postgres:5432/litellmdb
+    volumes:
+      - ./litellm_config.yaml:/app/config.yaml
+      # The pre-call hook. `litellm_settings.callbacks` names it
+      # `custom_callbacks.proxy_handler_instance`, so the file must land in
+      # /app under exactly this name.
+      - ./custom_callbacks.py:/app/custom_callbacks.py
+    command: [ "--config", "/app/config.yaml", "--port", "4000", "--num_workers", "8" ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  llm_postgres_data:

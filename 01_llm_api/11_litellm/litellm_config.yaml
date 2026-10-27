@@ -1,0 +1,272 @@
+model_list:
+  # ---------------------------------------------------------------------------
+  # RunPod (self-hosted vLLM)
+  # ---------------------------------------------------------------------------
+  - model_name: runpod-vllm-mistral
+    litellm_params:
+      model: hosted_vllm/mistralai/Mistral-7B-Instruct-v0.3
+      api_base: https://gnfzhaynntlve2-8080.proxy.runpod.net/v1
+      api_key: none
+
+  # ---------------------------------------------------------------------------
+  # OpenAI
+  # ---------------------------------------------------------------------------
+  - model_name: openai-gpt-5.4-nano
+    litellm_params:
+      model: openai/gpt-5.4-nano
+      api_key: os.environ/OPENAI_API_KEY
+  - model_name: openai-text-embedding-3-small
+    litellm_params:
+      model: openai/text-embedding-3-small
+      api_key: os.environ/OPENAI_EMBEDDING_API_KEY
+
+  # ---------------------------------------------------------------------------
+  # Anthropic
+  # ---------------------------------------------------------------------------
+  - model_name: anthropic-claude-sonnet-5
+    litellm_params:
+      model: anthropic/claude-sonnet-5
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  # ---------------------------------------------------------------------------
+  # Google Gemini
+  # (set GEMINI_API_KEY in the litellm container environment)
+  # ---------------------------------------------------------------------------
+  - model_name: gemini-flash
+    litellm_params:
+      model: gemini/gemini-2.5-flash
+      api_key: os.environ/GEMINI_API_KEY
+
+  # ---------------------------------------------------------------------------
+  # xAI Grok
+  # (set XAI_API_KEY in the litellm container environment)
+  # ---------------------------------------------------------------------------
+  - model_name: grok-mini
+    litellm_params:
+      model: xai/grok-3-mini
+      api_key: os.environ/XAI_API_KEY
+
+  # ---------------------------------------------------------------------------
+  # HuggingFace (Inference Providers router, OpenAI-compatible /v1)
+  # (set HF_TOKEN in the litellm container environment)
+  # ---------------------------------------------------------------------------
+  - model_name: hf-gemma-4
+    litellm_params:
+      model: openai/google/gemma-4-31B-it:novita
+      api_base: https://router.huggingface.co/v1
+      api_key: os.environ/HF_TOKEN
+
+  # ---------------------------------------------------------------------------
+  # OpenRouter (free Gemma model)
+  # ---------------------------------------------------------------------------
+  - model_name: openrouter-gemma
+    litellm_params:
+      model: openrouter/google/gemma-4-31b-it:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  # ===========================================================================
+  # THE LOCAL ENGINES - Ollama, LM Studio, Unsloth Studio
+  #
+  # Every cloud alias above needs only a model string and a key, because LiteLLM
+  # ships a table of what those models cost and how big their window is. It
+  # knows NOTHING about a model on your own machine. So each local alias states
+  # four things itself, and each one fails quietly when you leave it out.
+  #
+  #   max_tokens      A ceiling for the reply. These models THINK first, and the
+  #                   thinking spends the same budget as the answer. Measured on
+  #                   this machine: "Say hi in 3 words." cost the 26B anything
+  #                   from 546 to 1934 tokens, run to run. Hit the ceiling and
+  #                   `content` comes back EMPTY with finish_reason "length" and
+  #                   no error at all. 8192 clears the worst case seen.
+  #
+  #   timeout         LiteLLM defaults to 600 s. Your GPU reads a prompt at
+  #                   roughly 100 tokens a second, so a large prompt needs 5-15
+  #                   MINUTES before the first token arrives. The default expires
+  #                   mid-prompt, the engine socket is torn down, and LiteLLM
+  #                   reports a 400 - which it never retries. 3600 s is an hour,
+  #                   which is right for a local GPU and wrong for a cloud call.
+  #                   Cloud aliases keep the default on purpose.
+  #
+  #   max_input_tokens    The usable prompt window: the model's context minus the
+  #                   8192 reserved above for the reply. This is what rejects an
+  #                   over-long prompt BEFORE it reaches the model, instead of
+  #                   after 10 minutes of grinding.
+  #
+  #   input/output_cost_per_token   These models are free to run. The price is a
+  #                   SHADOW price - what the same work would cost on a cloud
+  #                   twin. State it, because an unpriced route logs $0, and a
+  #                   spend ceiling on $0 never trips. Numbers in /spend/logs are
+  #                   then "what this would have cost", not money billed.
+  #
+  # max_input_tokens does NOTHING unless `enable_pre_call_checks` is on. It is
+  # set at the bottom of this file. Turn it off and every window below is inert.
+  #
+  # Windows measured 2026-09-02 - `lms ps --json` for LM Studio, `GET /v1/status`
+  # for Unsloth. Do not copy them from a model card.
+  # ===========================================================================
+
+  # ---------------------------------------------------------------------------
+  # Ollama (self-hosted) - see lesson 7
+  #
+  # The least fussy engine: it loads on demand, holds several models at once,
+  # and ignores the key. But it EVICTS AN IDLE MODEL AFTER 5 MINUTES, so the
+  # second call of a session can be as slow as the first. `ollama ps` shows what
+  # is resident; `ollama list` only shows what is on disk.
+  # ---------------------------------------------------------------------------
+  - model_name: ollama-gemma-4-e4b
+    litellm_params:
+      model: ollama/gemma-4-e4b
+      api_base: http://192.168.2.114:11434
+      api_key: none
+      input_cost_per_token: 0.00000012    # shadow price - see the note above
+      output_cost_per_token: 0.00000035
+      max_tokens: 8192
+      timeout: 3600                       # a cold load reads ~10 GB from disk
+    model_info:
+      max_input_tokens: 122880            # 131072 context - the 8192 reserve
+      max_output_tokens: 8192
+
+  # ---------------------------------------------------------------------------
+  # LM Studio (local, OpenAI-compatible, port 1234) - see lesson 8
+  # From inside Docker, reach the host via host.docker.internal
+  #
+  # These three aliases are the TWIN of the three Unsloth ones below. Same two
+  # Gemma models, same embedder, different engine. So `lmstudio-gemma-26b` and
+  # `unsloth-gemma-26b` run the SAME weights, and swapping one alias for the
+  # other in your code measures the engine and nothing else.
+  #
+  # LM Studio takes any key, or none at all.
+  #
+  # CHECK `lms ps --json` IF LONG PROMPTS FAIL. LM Studio loads a model on demand
+  # when you call one that is not resident, and such a load does not inherit the
+  # flags a hand-load would use. If it comes back with a smaller context than the
+  # window below, `max_input_tokens` becomes a lie and a long prompt fails for no
+  # visible reason. Hand-load it instead:
+  #
+  #   lms load google/gemma-4-e4b         --context-length 131072 --gpu max
+  #   lms load google/gemma-4-26b-a4b-qat --context-length 262144 --gpu max
+  # ---------------------------------------------------------------------------
+  - model_name: lmstudio-gemma-4b
+    litellm_params:
+      model: lm_studio/google/gemma-4-e4b
+      api_base: http://host.docker.internal:1234/v1
+      api_key: none
+      input_cost_per_token: 0.00000012
+      output_cost_per_token: 0.00000035
+      max_tokens: 8192
+      timeout: 3600
+    model_info:
+      max_input_tokens: 122880            # 131072 context - the 8192 reserve
+      max_output_tokens: 8192
+  - model_name: lmstudio-gemma-26b
+    litellm_params:
+      model: lm_studio/google/gemma-4-26b-a4b-qat
+      api_base: http://host.docker.internal:1234/v1
+      api_key: none
+      input_cost_per_token: 0.00000012
+      output_cost_per_token: 0.00000035
+      max_tokens: 8192
+      timeout: 3600
+    model_info:
+      max_input_tokens: 253952            # 262144 context - the 8192 reserve
+      max_output_tokens: 8192
+  # Both engines serve nomic v1.5 at 768 dims, but in a DIFFERENT build: Q4_K_M
+  # here, Q8_0 on Unsloth. The vectors are NOT interchangeable. An index built
+  # with `lmstudio-embed` and searched with `unsloth-embed` returns quietly worse
+  # matches and never errors. Pick one alias per index and write down which.
+  #
+  # An embedder writes no tokens, so it needs no max_tokens and no output
+  # reserve. Its window is the whole 2048 it has.
+  - model_name: lmstudio-embed
+    litellm_params:
+      model: lm_studio/text-embedding-nomic-embed-text-v1.5
+      api_base: http://host.docker.internal:1234/v1
+      api_key: none
+      input_cost_per_token: 0             # free, and stated so it is not unpriced
+      output_cost_per_token: 0
+    model_info:
+      max_input_tokens: 2048
+
+  # ---------------------------------------------------------------------------
+  # Unsloth Studio (local, OpenAI-compatible, port 8888) - see lesson 9
+  #
+  # Three things differ from LM Studio above:
+  #
+  #   THE PREFIX IS `openai/`, NOT `unsloth/`. LiteLLM has no Unsloth provider.
+  #   A provider prefix means "speaks the OpenAI protocol", and `api_base` is the
+  #   only thing separating this from api.openai.com. The Unsloth model id then
+  #   carries its own slash, so each string below has TWO slashes - only the
+  #   first one is the provider.
+  #
+  #   IT NEEDS A REAL KEY. LM Studio takes any string; Unsloth answers 401 on
+  #   every route without one. Put UNSLOTH_API_KEY in .env.
+  #
+  #   IT SERVES ONE MODEL AT A TIME, and the limit spans chat AND embeddings.
+  #   Calling `unsloth-embed` unloads `unsloth-gemma-4b`, and the next chat call
+  #   swaps it back. Turn on `Settings > API > Model auto-switch` in the app, or
+  #   the second alias you call returns 400 "No model loaded". A swap costs 4 to
+  #   9 seconds, which is another reason the timeout below is generous.
+  #
+  # Thinking is a property of the MODEL, not of Unsloth. The same weights think
+  # on LM Studio too. The proxy does not add or remove it - it only forwards your
+  # request - so `max_tokens` is the one thing that protects you either way.
+  # ---------------------------------------------------------------------------
+  - model_name: unsloth-gemma-4b
+    litellm_params:
+      model: openai/unsloth/gemma-4-E4B-it-qat-GGUF
+      api_base: http://host.docker.internal:8888/v1
+      api_key: os.environ/UNSLOTH_API_KEY
+      input_cost_per_token: 0.00000012
+      output_cost_per_token: 0.00000035
+      max_tokens: 8192
+      timeout: 3600
+    model_info:
+      max_input_tokens: 122880            # 131072 context - the 8192 reserve
+      max_output_tokens: 8192
+  - model_name: unsloth-gemma-26b
+    litellm_params:
+      model: openai/unsloth/gemma-4-26B-A4B-it-qat-GGUF
+      api_base: http://host.docker.internal:8888/v1
+      api_key: os.environ/UNSLOTH_API_KEY
+      input_cost_per_token: 0.00000012
+      output_cost_per_token: 0.00000035
+      max_tokens: 8192
+      timeout: 3600
+    model_info:
+      max_input_tokens: 253952            # 262144 context - the 8192 reserve
+      max_output_tokens: 8192
+  - model_name: unsloth-embed
+    litellm_params:
+      model: openai/second-state/Nomic-embed-text-v1.5-Embedding-GGUF
+      api_base: http://host.docker.internal:8888/v1
+      api_key: os.environ/UNSLOTH_API_KEY
+      input_cost_per_token: 0
+      output_cost_per_token: 0
+    model_info:
+      max_input_tokens: 2048              # from Unsloth's own GET /v1/status
+
+litellm_settings:
+  # Send each provider the parameters it understands and drop the rest. Without
+  # this, one client calling many providers fails on whichever parameter the
+  # current provider has never heard of.
+  drop_params: true
+
+  # `drop_params` fixes PARAMETERS. It cannot reach inside the messages, and
+  # Unsloth Studio rejects a `name` on any message that is not a tool result -
+  # which OpenAI itself allows. A pre-call hook removes it, for the unsloth
+  # aliases only. See custom_callbacks.py for the whole story.
+  #
+  # The file is mounted at /app/custom_callbacks.py by docker-compose.yml. Get
+  # that path or this name wrong and NOTHING is logged - the hook simply never
+  # runs.
+  callbacks: custom_callbacks.proxy_handler_instance
+
+router_settings:
+  # THIS SWITCH MAKES `max_input_tokens` REAL. It is off by default, and while it
+  # is off every window declared above is decoration: an over-long prompt is sent
+  # to the model anyway and fails there, minutes later.
+  enable_pre_call_checks: true
+
+general_settings:
+  store_model_in_db: true
+  store_prompts_in_spend_logs: true
