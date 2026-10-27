@@ -21,3 +21,8 @@ agent_logs
 pyrightconfig.json
 
 .DS_Store
+
+# lokalne vystupy z behov (Juraj)
+vystup*.txt
+vysledok_*.txt
+01_llm_api/01_openai/5_generate_image/output.png
